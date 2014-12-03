@@ -5,17 +5,28 @@ public class TomasuloMemory {
 
     static TomasuloMemory memoryInstance = null;
     byte[] data = new byte[4000];
-    int memorySize;
 
     // Singleton design pattern without double checked locking
-    static TomasuloMemory createInstance(){
+    static TomasuloMemory getInstance(){
         if (memoryInstance == null)
             memoryInstance = new TomasuloMemory();
         return memoryInstance;
     }
 
-    void addLineOfData(int address, byte dataItem){
-        data[address] = dataItem;
+    void insertDataByte(int address, byte dataItem){
+       data[address] = dataItem;
+    }
+
+    int[] fetchFourBytes(int address){
+        if (address % 4 != 0){ // make sure data is aligned
+            System.out.println("Error with PC input. Program ended.");
+            System.exit(0);
+        }
+        int[] fourBytes = new int[4];
+        for(int i = 0; i < 4; i++){
+            fourBytes[i] = data[address + i];
+        }
+        return fourBytes;
     }
 
     void printDataContents(){

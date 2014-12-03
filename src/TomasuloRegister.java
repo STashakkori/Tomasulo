@@ -1,12 +1,12 @@
 /**
  * Created by rt on 11/29/14.
  */
-public class TomasuloRegisterFile {
+public class TomasuloRegister {
     protected long[] registers;
     protected String[] Qi;
     static final int REGISTERFILESIZE = 32;
 
-    public TomasuloRegisterFile(){
+    public TomasuloRegister(){
         registers = new long[REGISTERFILESIZE];
         Qi = new String[REGISTERFILESIZE];
     }

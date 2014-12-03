@@ -4,13 +4,23 @@
 public class TomasuloCommonDataBus {
 
     long result;
-    String reservationStation;
+    String nameOfWritingReservationStation;
+    static TomasuloCommonDataBus cdbInstance = null;
 
-    public void setReservationStation(String reservationStation){
-        this.reservationStation = reservationStation;
+    public TomasuloCommonDataBus getInstance(){
+        if (cdbInstance == null)
+            cdbInstance = new TomasuloCommonDataBus();
+        return cdbInstance;
     }
 
-    public String getReservationStation() {
-        return reservationStation;
+    public void setReservationStation(String rsName){
+        this.nameOfWritingReservationStation = rsName;
+    }
+
+    public String getRSName() {
+        return nameOfWritingReservationStation;
+    }
+    public long getResult(){
+        return result;
     }
 }

@@ -4,17 +4,17 @@
 public class TomasuloInstruction {
 
     String opcode;
-    int opcodeNo;
-    int funCode;
-    String dstReg;
-    boolean dstRegBit;
-    boolean firstSourceReg;
-    boolean isFirstSourceRegBit;
-    boolean secondSource;
-    boolean isSecondSourceRegBit;
-    boolean immedField;
-    boolean immedFieldStartingBit;
-    boolean immedFieldEndingBit;
+    int opcodeNumberValue;
+    int functionCode;
+    String destinationRegister;
+    boolean firstSourceRegister;
+    boolean secondSourceRegister;
+    boolean isFirstSourceRegisterBit;
+    boolean isSecondSourceRegisterBit;
+    boolean destinationRegisterBit;
+    boolean immediateField;
+    boolean immediateFieldStartingBit;
+    boolean immediateFieldEndingBit;
 
     public TomasuloInstruction(){
 

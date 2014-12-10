@@ -6,6 +6,8 @@ import java.util.HashMap;
 public class TomasuloDecoder {
 
     HashMap<Integer,String> instructionOpcodeMap;
+    HashMap<Integer, String> instructionFunctionCodeMap;
+    HashMap<String,String> instructionRegisterMap;
 
     /*
         TomasuloDecoder constructor method
@@ -13,18 +15,12 @@ public class TomasuloDecoder {
     public TomasuloDecoder(){
 
         instructionOpcodeMap= new HashMap(); // opcodenumber -> instruction operation
+        instructionFunctionCodeMap = new HashMap(); // functioncode -> instruction operation
 
         // Integer Unit Instructions
         instructionOpcodeMap.put(8,"addi");
-        instructionOpcodeMap.put(0,"nop");
-        instructionOpcodeMap.put(32,"add");
-        instructionOpcodeMap.put(34,"sub");
-        instructionOpcodeMap.put(36,"and");
-        instructionOpcodeMap.put(37,"or");
-        instructionOpcodeMap.put(38,"zor");
-        instructionOpcodeMap.put(50,"movf");
-        instructionOpcodeMap.put(52,"movfp2i");
-        instructionOpcodeMap.put(53,"movi2fp");
+        instructionOpcodeMap.put(0,"rtypei");
+        instructionOpcodeMap.put(1,"rtypef");
 
         // Trap Unit Instructions
         instructionOpcodeMap.put(17,"trap");
@@ -42,23 +38,173 @@ public class TomasuloDecoder {
         instructionOpcodeMap.put(43,"sw");
         instructionOpcodeMap.put(46,"sf");
 
-        // Floating Point Instructions
-        instructionOpcodeMap.put(0,"addf");
-        instructionOpcodeMap.put(1,"subf");
-        instructionOpcodeMap.put(2,"multf");
-        instructionOpcodeMap.put(3,"divf");
-        instructionOpcodeMap.put(14,"mult");
-        instructionOpcodeMap.put(15,"div");
-        instructionOpcodeMap.put(9,"ctf2i");
-        instructionOpcodeMap.put(12,"cvti2f");
+        // Floating Point Rtype Instructions
+        instructionFunctionCodeMap.put(0,"addf");
+        instructionFunctionCodeMap.put(1,"subf");
+        instructionFunctionCodeMap.put(2,"multf");
+        instructionFunctionCodeMap.put(3,"divf");
+        instructionFunctionCodeMap.put(9,"ctf2i");
+        instructionFunctionCodeMap.put(12,"cvti2f");
+        instructionFunctionCodeMap.put(14,"mult");
+        instructionFunctionCodeMap.put(15,"div");
+
+        //Integer Unit Rtype Instructions
+        instructionFunctionCodeMap.put(32,"add");
+        instructionFunctionCodeMap.put(34,"sub");
+        instructionFunctionCodeMap.put(36,"and");
+        instructionFunctionCodeMap.put(37,"or");
+        instructionFunctionCodeMap.put(38,"xor");
+        instructionFunctionCodeMap.put(50,"movf");
+        instructionFunctionCodeMap.put(52,"movfp2i");
+        instructionFunctionCodeMap.put(53,"movi2fp");
+
+        // Map that stores the register structure of each instruction operation
+        instructionRegisterMap = new HashMap();
+        instructionRegisterMap.put("nop","none");
+        instructionRegisterMap.put("trap","number");
+        instructionRegisterMap.put("j","name");
+        instructionRegisterMap.put("jal","name");
+        instructionRegisterMap.put("jr","gpr");
+        instructionRegisterMap.put("jalr","gpr");
+        instructionRegisterMap.put("beqz","gprname");
+        instructionRegisterMap.put("benz","gprname");
+        instructionRegisterMap.put("movfp2i","gprfpr");
+        instructionRegisterMap.put("movd","dprdpr");
+        instructionRegisterMap.put("cvtf2i","fprfpr");
+        instructionRegisterMap.put("cvti2f","fprfpr");
+        instructionRegisterMap.put("movf","fprfpr");
+        instructionRegisterMap.put("lhi","gprnum");
+        instructionRegisterMap.put("movi2fp","fprgpr");
+        instructionRegisterMap.put("cvtd2f","fprdpr");
+        instructionRegisterMap.put("cvtd2i","fprdpr");
+        instructionRegisterMap.put("cvtf2d","dprfpr");
+        instructionRegisterMap.put("cvti2d","dprfpr");
+        instructionRegisterMap.put("addi","gprgprint");
+        instructionRegisterMap.put("seqi","gprgprint");
+        instructionRegisterMap.put("sgei","gprgprint");
+        instructionRegisterMap.put("sgti","gprgprint");
+        instructionRegisterMap.put("slei","gprgprint");
+        instructionRegisterMap.put("slti","gprgprint");
+        instructionRegisterMap.put("snei","gprgprint");
+        instructionRegisterMap.put("subi","gprgprint");
+        instructionRegisterMap.put("addui","gprgpruint");
+        instructionRegisterMap.put("andi","gprgpruint");
+        instructionRegisterMap.put("ori","gprgpruint");
+        instructionRegisterMap.put("slli","gprgpruint");
+        instructionRegisterMap.put("srai","gprgpruint");
+        instructionRegisterMap.put("srli","gprgpruint");
+        instructionRegisterMap.put("subui","gprgpruint");
+        instructionRegisterMap.put("xori","gprgpruint");
+        instructionRegisterMap.put("add","gprgprgpr");
+        instructionRegisterMap.put("addu","gprgprgpr");
+        instructionRegisterMap.put("and","gprgprgpr");
+        instructionRegisterMap.put("or","gprgprgpr");
+        instructionRegisterMap.put("seq","gprgprgpr");
+        instructionRegisterMap.put("sge","gprgprgpr");
+        instructionRegisterMap.put("sgt","gprgprgpr");
+        instructionRegisterMap.put("sle","gprgprgpr");
+        instructionRegisterMap.put("sll","gprgprgpr");
+        instructionRegisterMap.put("slt","gprgprgpr");
+        instructionRegisterMap.put("sne","gprgprgpr");
+        instructionRegisterMap.put("sra","gprgprgpr");
+        instructionRegisterMap.put("srl","gprgprgpr");
+        instructionRegisterMap.put("sub","gprgprgpr");
+        instructionRegisterMap.put("subu","gprgprgpr");
+        instructionRegisterMap.put("xor","gprgprgpr");
+        instructionRegisterMap.put("addd","dprdprdpr");
+        instructionRegisterMap.put("divd","dprdprdpr");
+        instructionRegisterMap.put("multd","dprdprdpr");
+        instructionRegisterMap.put("subd","dprdprdpr");
+        instructionRegisterMap.put("addf","fprfprfpr");
+        instructionRegisterMap.put("div","fprfprfpr");
+        instructionRegisterMap.put("divf","fprfprfpr");
+        instructionRegisterMap.put("divu","fprfprfpr");
+        instructionRegisterMap.put("mult","fprfprfpr");
+        instructionRegisterMap.put("multf","fprfprfpr");
+        instructionRegisterMap.put("multu","fprfprfpr");
+        instructionRegisterMap.put("subf","fprfprfpr");
+        instructionRegisterMap.put("lb","gproff");
+        instructionRegisterMap.put("lbu","gproff");
+        instructionRegisterMap.put("lh","gproff");
+        instructionRegisterMap.put("lhu","gproff");
+        instructionRegisterMap.put("lw","gproff");
+        instructionRegisterMap.put("ld","dproff");
+        instructionRegisterMap.put("lf","fproff");
+        instructionRegisterMap.put("sb","offgpr");
+        instructionRegisterMap.put("sh","offgpr");
+        instructionRegisterMap.put("sw","offgpr");
+        instructionRegisterMap.put("sd","offdpr");
+        instructionRegisterMap.put("sf","offfpr");
     }
 
     /*
         getInstructionOpcodeOperation :: Method that checks an opcode number
             and returns a string for the operation name.
      */
-    public String getInstructionOpcodeOperation(int opcodeNumber){
+    public String getInstructionOpcodeOperation(int[] encoding){
+        int opcodeNumber = extractSixBitOpcode(encoding);
+        System.out.println("decoder test: " + opcodeNumber);
+        if (instructionOpcodeMap.get(opcodeNumber) == "rtypei"){
+            int functionCode = extractSixBitFunctionCode(encoding);
+            System.out.println("functionCode:  " + functionCode);
+            return instructionFunctionCodeMap.get(functionCode);
+        }
+        if (instructionOpcodeMap.get(opcodeNumber) == "rtypef"){
+            int functionCode = extractFiveBitFunctionCode(encoding);
+            System.out.println("functionCode:  " + functionCode);
+            return instructionFunctionCodeMap.get(functionCode);
+        }
         return instructionOpcodeMap.get(opcodeNumber);
+    }
+
+    public String getInstructionOpcodeOperationFromWord(int encoding){
+        int opcodeNumber = extractSixBitOpcodeFromWord(encoding);
+        System.out.println("decoder test: " + opcodeNumber);
+        if (instructionOpcodeMap.get(opcodeNumber) == "rtypei"){
+            int functionCode = extractSixBitFunctionCodeFromWord(encoding);
+            System.out.println("functionCode:  " + functionCode);
+            return instructionFunctionCodeMap.get(functionCode);
+        }
+        if (instructionOpcodeMap.get(opcodeNumber) == "rtypef"){
+            int functionCode = extractFiveBitFunctionCodeFromWord(encoding);
+            System.out.println("functionCode:  " + functionCode);
+            return instructionFunctionCodeMap.get(functionCode);
+        }
+        return instructionOpcodeMap.get(opcodeNumber);
+    }
+
+    static int extractSixBitOpcode(int[] encoding){
+        int extraction = encoding[0];
+        extraction >>= 2;
+        return extraction;
+    }
+
+    static int extractSixBitOpcodeFromWord(int encoding){
+        encoding >>>= (32 - 6);
+        encoding &= 0x0000003F;
+        return encoding;
+    }
+
+    static int extractSixBitFunctionCodeFromWord(int encoding){
+        encoding &= 0x0000003F;
+        return encoding;
+    }
+
+    static int extractFiveBitFunctionCodeFromWord(int encoding){
+        encoding &= 0x0000001F;
+        return encoding;
+    }
+
+    static int extractSixBitFunctionCode(int[] encoding){
+        int extraction = encoding[3];
+        extraction >>= 2;
+        return extraction;
+    }
+
+    static int extractFiveBitFunctionCode(int[] encoding){
+        int extraction = encoding[3];
+        extraction >>= 3;
+        return extraction;
     }
 
     /*

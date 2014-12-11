@@ -1,89 +1,97 @@
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.PriorityQueue;
+import java.util.Queue;
 
 /**
  * Created by rt on 11/30/14.
  */
 public class TomasuloFunctionalUnitManager {
 
-    HashMap<String,String> instructionRegisterMap;
+    TomasuloFunctionalUnit[] functionalUnits = new TomasuloFunctionalUnit[8];
+    public Queue<TomasuloReservationStation> trapBuffer;
+    public Queue<TomasuloReservationStation> loadstoreBuffer;
 
     public TomasuloFunctionalUnitManager(){
 
-        instructionRegisterMap = new HashMap();
-        instructionRegisterMap.put("nop","none");
-        instructionRegisterMap.put("trap","number");
-        instructionRegisterMap.put("j","name");
-        instructionRegisterMap.put("jal","name");
-        instructionRegisterMap.put("jr","gpr");
-        instructionRegisterMap.put("jalr","gpr");
-        instructionRegisterMap.put("beqz","gprname");
-        instructionRegisterMap.put("benz","gprname");
-        instructionRegisterMap.put("movfp2i","gprfpr");
-        instructionRegisterMap.put("movd","dprdpr");
-        instructionRegisterMap.put("cvtf2i","fprfpr");
-        instructionRegisterMap.put("cvti2f","fprfpr");
-        instructionRegisterMap.put("movf","fprfpr");
-        instructionRegisterMap.put("lhi","gprnum");
-        instructionRegisterMap.put("movi2fp","fprgpr");
-        instructionRegisterMap.put("cvtd2f","fprdpr");
-        instructionRegisterMap.put("cvtd2i","fprdpr");
-        instructionRegisterMap.put("cvtf2d","dprfpr");
-        instructionRegisterMap.put("cvti2d","dprfpr");
-        instructionRegisterMap.put("addi","gprgprint");
-        instructionRegisterMap.put("seqi","gprgprint");
-        instructionRegisterMap.put("sgei","gprgprint");
-        instructionRegisterMap.put("sgti","gprgprint");
-        instructionRegisterMap.put("slei","gprgprint");
-        instructionRegisterMap.put("slti","gprgprint");
-        instructionRegisterMap.put("snei","gprgprint");
-        instructionRegisterMap.put("subi","gprgprint");
-        instructionRegisterMap.put("addui","gprgpruint");
-        instructionRegisterMap.put("andi","gprgpruint");
-        instructionRegisterMap.put("ori","gprgpruint");
-        instructionRegisterMap.put("slli","gprgpruint");
-        instructionRegisterMap.put("srai","gprgpruint");
-        instructionRegisterMap.put("srli","gprgpruint");
-        instructionRegisterMap.put("subui","gprgpruint");
-        instructionRegisterMap.put("xori","gprgpruint");
-        instructionRegisterMap.put("add","gprgprgpr");
-        instructionRegisterMap.put("addu","gprgprgpr");
-        instructionRegisterMap.put("and","gprgprgpr");
-        instructionRegisterMap.put("or","gprgprgpr");
-        instructionRegisterMap.put("seq","gprgprgpr");
-        instructionRegisterMap.put("sge","gprgprgpr");
-        instructionRegisterMap.put("sgt","gprgprgpr");
-        instructionRegisterMap.put("sle","gprgprgpr");
-        instructionRegisterMap.put("sll","gprgprgpr");
-        instructionRegisterMap.put("slt","gprgprgpr");
-        instructionRegisterMap.put("sne","gprgprgpr");
-        instructionRegisterMap.put("sra","gprgprgpr");
-        instructionRegisterMap.put("srl","gprgprgpr");
-        instructionRegisterMap.put("sub","gprgprgpr");
-        instructionRegisterMap.put("subu","gprgprgpr");
-        instructionRegisterMap.put("xor","gprgprgpr");
-        instructionRegisterMap.put("addd","dprdprdpr");
-        instructionRegisterMap.put("divd","dprdprdpr");
-        instructionRegisterMap.put("multd","dprdprdpr");
-        instructionRegisterMap.put("subd","dprdprdpr");
-        instructionRegisterMap.put("addf","fprfprfpr");
-        instructionRegisterMap.put("div","fprfprfpr");
-        instructionRegisterMap.put("divf","fprfprfpr");
-        instructionRegisterMap.put("divu","fprfprfpr");
-        instructionRegisterMap.put("mult","fprfprfpr");
-        instructionRegisterMap.put("multf","fprfprfpr");
-        instructionRegisterMap.put("multu","fprfprfpr");
-        instructionRegisterMap.put("subf","fprfprfpr");
-        instructionRegisterMap.put("lb","gproff");
-        instructionRegisterMap.put("lbu","gproff");
-        instructionRegisterMap.put("lh","gproff");
-        instructionRegisterMap.put("lhu","gproff");
-        instructionRegisterMap.put("lw","gproff");
-        instructionRegisterMap.put("ld","dproff");
-        instructionRegisterMap.put("lf","fproff");
-        instructionRegisterMap.put("sb","offgpr");
-        instructionRegisterMap.put("sh","offgpr");
-        instructionRegisterMap.put("sw","offgpr");
-        instructionRegisterMap.put("sd","offdpr");
-        instructionRegisterMap.put("sf","offfpr");
+        trapBuffer = new LinkedList<TomasuloReservationStation>();
+        loadstoreBuffer = new LinkedList<TomasuloReservationStation>();
+
+        // Initialize functional units :: integer units
+        for(int i = 0; i < 3; i++){
+            functionalUnits[i] = new TomasuloIntegerFunctionalUnit();
+            functionalUnits[i].name = "Int" + i;
+        }
+
+        // Initialize functional units :: trap units
+            functionalUnits[3] = new TomasuloTrapFunctionalUnit();
+            functionalUnits[3].name = "Trap0";
+
+        // Initialize functional units :: memory units
+            functionalUnits[4] = new TomasuloMemoryFunctionalUnit();
+            functionalUnits[4].name = "Mem0";
+
+        // Initialize functional units :: floating point units
+        for(int i = 5; i < 7; i++){
+            functionalUnits[i] = new TomasuloFloatingPointFunctionalUnit();
+            functionalUnits[i].name = "Float" + i % 5;
+        }
+
+        // Initialize functional units :: branch units
+            functionalUnits[7] = new TomasuloBranchFunctionalUnit();
+            functionalUnits[7].name = "Branch0";
+    }
+
+    public void printFunctionalUnitContents(){
+
+    }
+
+    public void takeInstruction(TomasuloInstruction instruction){
+
+    }
+
+    public boolean allUnitsCompleted(){
+        return false;
+    }
+
+    public TomasuloFunctionalUnit nextAvailableFunctionalUnit(String instructionType) {
+        switch(instructionType){
+            case "int":
+                for (TomasuloFunctionalUnit fu : functionalUnits) {
+                    if (fu.getClass().getName().equals("TomasuloIntegerFunctionalUnit")
+                            && !fu.isFunctionalUnitBusy) {
+                        return fu;
+                    }
+                }
+            case "trap":
+                for (TomasuloFunctionalUnit fu : functionalUnits) {
+                    if (fu.getClass().getName().equals("TomasuloTrapFunctionalUnit")
+                            && !fu.isFunctionalUnitBusy) {
+                        return fu;
+                    }
+                }
+            case "mem":
+                for (TomasuloFunctionalUnit fu : functionalUnits) {
+                    if (fu.getClass().getName().equals("TomasuloMemoryFunctionalUnit")
+                            && !fu.isFunctionalUnitBusy) {
+                        return fu;
+                    }
+                }
+            case "float":
+                for (TomasuloFunctionalUnit fu : functionalUnits) {
+                    if (fu.getClass().getName().equals("TomasuloFloatingPointFunctionalUnit")
+                            && !fu.isFunctionalUnitBusy) {
+                        return fu;
+                    }
+                }
+            case "branch":
+                for (TomasuloFunctionalUnit fu : functionalUnits) {
+                    if (fu.getClass().getName().equals("TomasuloBranchFunctionalUnit")
+                            && !fu.isFunctionalUnitBusy) {
+                        return fu;
+                    }
+                }
+        }
+        return null;
     }
 }

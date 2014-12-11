@@ -18,6 +18,8 @@ public class TomasuloCentralProcessingUnit {
     boolean halt;
     boolean stall;
 
+    int testcounter = 0;
+
     public TomasuloCentralProcessingUnit(){
         instructionBuilder = new TomasuloInstructionFactory();
         decoder = new TomasuloDecoder();
@@ -35,16 +37,30 @@ public class TomasuloCentralProcessingUnit {
         //cpu.instructionBuilder.makeInstruction();
 
         while(!halt || !functionalUnitsCompleted()){
+            System.out.println("Clock cycle: " + clock.cycle);
+            System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~");
             cdb = writeResult(fuManager);
             //execute(fuManager);
             if(!halt && !branch){
                 word = memory.fetchWord(pc.address);
                 instruction = decodeInstruction(word,decoder,instructionBuilder);
-                stall = issue(instruction,rsManager,fuManager);
+                stall = issue(instruction,rsManager,fuManager,regManager);
+                for(TomasuloRegister reg : regManager.registers){
+                    System.out.println("Qi: " + reg.Qi);
+                }
+                for(TomasuloReservationStation rs : rsManager.reservationStations){
+                    System.out.println("Qj: " + rs.Qj);
+                    System.out.println("Qk: " + rs.Qk);
+                    System.out.println("Vj: " + rs.Vj);
+                    System.out.println("Vk: " + rs.Vk);
+                }
+                System.out.println("====================");
                 if(!halt && !stall) pc.increment();
                 clock.increment();
                 updateReservationStations(cdb);
                 clearReservationStations();
+                if(testcounter== 5) break;
+                testcounter++;
                 //printDumps(memory,rsManager,fuManager,regManager);
             }
         }
@@ -121,12 +137,8 @@ public class TomasuloCentralProcessingUnit {
         return decoder.decodeOperands(registerDesign,encoding);
     }
 
-    static boolean execute(TomasuloFunctionalUnitManager fuManager){
-        for(TomasuloFunctionalUnit f : fuManager.functionalUnits){
-            f.execute();
-            if(f.getClass().getName().equals("TomasuloBranchFunctionalUnit")) return f.execute();
-        }
-        return false;
+    static void execute(TomasuloReservationStationManager rsManager, TomasuloFunctionalUnitManager fuManager){
+        rsManager.execute(fuManager);
     }
 
     static TomasuloCommonDataBus writeResult(TomasuloFunctionalUnitManager fuManager){
@@ -139,22 +151,23 @@ public class TomasuloCentralProcessingUnit {
         return null;
     }
 
-    static boolean issue(TomasuloInstruction instruction,TomasuloReservationStationManager rsManager, TomasuloFunctionalUnitManager fuManager){
+    static boolean issue(TomasuloInstruction instruction,TomasuloReservationStationManager rsManager, TomasuloFunctionalUnitManager fuManager,
+                         TomasuloRegisterFileManager rfManager){
         if(instruction.getOpcodeName().equals("trap") && instruction.getImmediateValue() == 0){
             return true;
         }
         if(!rsManager.hasAvailableRStation()) return true;
         switch(instruction.getClass().getName()) {
             case "TomasuloFloatingPointInstruction":
-                return rsManager.issue("fp",fuManager);
+                return rsManager.issue("fp",instruction,fuManager,rfManager);
             case "TomasuloIntegerInstruction":
-                return rsManager.issue("int",fuManager);
+                return rsManager.issue("int",instruction,fuManager,rfManager);
             case "TomasuloMemoryInstruction":
-                return rsManager.issue("mem",fuManager);
+                return rsManager.issue("mem",instruction,fuManager,rfManager);
             case "TomasuloBranchInstruction":
-                return rsManager.issue("branch",fuManager);
+                return rsManager.issue("branch",instruction,fuManager,rfManager);
             case "TomasuloTrapInstruction":
-                return rsManager.issue("trap",fuManager);
+                return rsManager.issue("trap",instruction,fuManager,rfManager);
         }
         return false;
     }

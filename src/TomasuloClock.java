@@ -8,11 +8,11 @@ public class TomasuloClock {
     static TomasuloClock clockInstance = null;
 
     private TomasuloClock(){
-        cycle = 0;
+        cycle = 1;
     }
 
     // Singleton design pattern without double checked locking
-    static TomasuloClock createInstance(){
+    static TomasuloClock getInstance(){
         if (clockInstance == null)
             clockInstance = new TomasuloClock();
         return clockInstance;

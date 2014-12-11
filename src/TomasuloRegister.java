@@ -2,22 +2,27 @@
  * Created by rt on 11/29/14.
  */
 public class TomasuloRegister {
-    protected long[] registers;
-    protected String[] Qi;
-    static final int REGISTERFILESIZE = 32;
+    public String Qi;
+    public String registerName;
+    public int value;
+    public boolean hasOperand;
 
-    public TomasuloRegister(){
-        registers = new long[REGISTERFILESIZE];
-        Qi = new String[REGISTERFILESIZE];
+    public TomasuloRegister(String name){
+        Qi = null;
+        registerName = name;
+        value = 0;
     }
 
     public boolean isAvailable(int registerNumber){
-        return ((Qi[registerNumber] == null) ? true : false);
+        return ((Qi == null) ? true : false);
     }
 
-    public long getRegister(int registerNumber)
-    {
-        return registers[registerNumber];
+    public void setHasOperand(boolean hasOperand) {
+        this.hasOperand = hasOperand;
     }
 
+    public boolean isHasOperand() {
+
+        return hasOperand;
+    }
 }

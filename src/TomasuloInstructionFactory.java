@@ -18,6 +18,8 @@ public class TomasuloInstructionFactory {
                 return new TomasuloBranchInstruction();
             case "trap":
                 return new TomasuloTrapInstruction();
+            case "error":
+                return null;
         };
     return null;
     }

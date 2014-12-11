@@ -33,7 +33,6 @@ public class TomasuloMain {
             System.out.println("============================================");
         }
         System.out.println("============================================");
-        memory.printDataContents();
 
         // Initialize the cpu and run the processor.
         TomasuloCentralProcessingUnit cpu = TomasuloCentralProcessingUnit.createInstance();

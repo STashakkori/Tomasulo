@@ -29,6 +29,21 @@ public class TomasuloMemory {
         return fourBytes;
     }
 
+    public int fetchWord(int address) {
+        if (address % 4 != 0){ // make sure data is aligned
+            System.out.println("Error with PC input. Program ended.");
+            System.exit(0);
+        }
+        int result = 0;
+        for (int i = 0; i < 4; i++) {
+            result |= (data[address + i] & 0xFF);
+            if (i < 3) result <<= 8;
+        }
+        return result;
+    }
+
+    //result = ( result << 8 ) - Byte.MIN_VALUE + (int) bytes[i];
+
     void printDataContents(){
         int memAddress = 0;
         System.out.println("================= Memory Dump ==================");

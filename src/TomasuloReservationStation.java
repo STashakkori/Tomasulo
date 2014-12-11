@@ -5,17 +5,18 @@ public class TomasuloReservationStation {
 
     public String name; // name of the reservation station
     public boolean busy; // set if the reservation station
-    public String opcode; // the opcode
-    public long Vj; // first operand
-    public long Vk; // second operand
+    public String opcode; // the opcodeName
+    public int Vj; // first operand
+    public int Vk; // second operand
     public String Qj; // reservation station for Vj
     public String Qk; // reservation station for Vk
-    public long A; // immediate field or effective address
-    public long result; // the result
+    public int A; // immediate field or effective address
+    public int result; // the result
     public boolean resultReady; // result ready for writing yet?
     public boolean resultWritten; // result written yet?
+    public String type;
 
-    public TomasuloReservationStation(String nameOfStation){
+    public TomasuloReservationStation(String nameOfStation, String type){
         this.name = nameOfStation;
         busy = false;
         opcode = null;
@@ -27,6 +28,7 @@ public class TomasuloReservationStation {
         result = 0;
         resultReady = false;
         resultWritten = false;
+        this.type = type;
     }
 
     /*
@@ -49,6 +51,14 @@ public class TomasuloReservationStation {
     }
 
     public void printContents(){
+
+    }
+
+    public boolean isReadyForExecution(){
+        return (busy == true && Qj == null && Qk == null && resultReady == false);
+    }
+
+    public void execute(TomasuloFunctionalUnitManager fuManager){
 
     }
 

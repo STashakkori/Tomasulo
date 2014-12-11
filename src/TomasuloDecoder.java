@@ -138,7 +138,7 @@ public class TomasuloDecoder {
     }
 
     /*
-        getInstructionOpcodeOperation :: Method that checks an opcode number
+        getInstructionOpcodeOperation :: Method that checks an opcodeName number
             and returns a string for the operation name.
      */
     public String getInstructionOpcodeOperation(int[] encoding){
@@ -171,6 +171,289 @@ public class TomasuloDecoder {
             return instructionFunctionCodeMap.get(functionCode);
         }
         return instructionOpcodeMap.get(opcodeNumber);
+    }
+
+    public String[] decodeOperands(String registerDesign, int encoding){
+    /*     registers[0] = first source register
+           registers[1] = second source register
+           registers[2] = destination register
+           registers[3] = immediate value
+    */
+        String[] registers = new String[]{"none","none","none","none"};
+        int fiveBitMask = 0x0000001F;
+        int sixBitMask = 0x0000003F;
+        int sixteenBitMask = 0x0000FFFF;
+        int twentySixBitMask = 0x03FFFFFF;
+        int register = 0;
+        switch(registerDesign){
+            case "none":
+                return registers;
+
+            case "number":
+                register |= encoding;
+                register &= fiveBitMask;
+                registers[3] = "" + register;
+                register |= encoding;
+                register >>= (32 - (6 + 5));
+                register &= fiveBitMask;
+                registers[0] = "r" + register;
+                return registers;
+
+            case "name":
+                register |= encoding;
+                register &= twentySixBitMask;
+                registers[2] = "" + register;
+                return registers;
+
+            case "gpr":
+                register |= encoding;
+                register >>= (5 + 16);
+                register &= fiveBitMask;
+                registers[0] = "r" + register;
+                return registers;
+
+            case "gprname":
+                register |= encoding;
+                register >>= (5 + 16);
+                register &= fiveBitMask;
+                registers[0] = "r" + register;
+                register |= encoding;
+                register &= sixteenBitMask;
+                registers[3] = "" + register;
+                return registers;
+
+            case "gprfpr":
+                register |= encoding;
+                register >>= (5 + 6);
+                register &= fiveBitMask;
+                registers[2] = "r" + register;
+                register |= encoding;
+                register >>= (5 + 5 + 5 + 6);
+                register &= fiveBitMask;
+                registers[0] = "f" + register;
+                return registers;
+
+            case "dprdpr":
+                register |= encoding;
+                register >>= (5 + 6);
+                register &= fiveBitMask;
+                registers[2] = "f" + register;
+                register |= encoding;
+                register >>= (5 + 5 + 5 + 6);
+                register &= fiveBitMask;
+                registers[0] = "f" + register;
+                return registers;
+
+            case "fprfpr":
+                register |= encoding;
+                register >>= (5 + 6);
+                register &= fiveBitMask;
+                registers[2] = "f" + register;
+                register |= encoding;
+                register >>= (5 + 5 + 5 + 6);
+                register &= fiveBitMask;
+                registers[0] = "f" + register;
+                return registers;
+
+            case "gprnum":
+                register |= encoding;
+                register &= sixteenBitMask;
+                registers[3] = "" + register;
+                register |= encoding;
+                register >>= 16;
+                register &= fiveBitMask;
+                registers[2] = "r" + register;
+                return registers;
+
+            case "fprgpr":
+                register |= encoding;
+                register >>= 5 + 6;
+                register >>= fiveBitMask;
+                registers[2] = "f" + register;
+                register |= encoding;
+                register >>= (6 + 5 + 5 + 5);
+                register &= fiveBitMask;
+                registers[0] = "r" + register;
+                return registers;
+
+            case "fprdpr":
+                register |= encoding;
+                register >>= 5 + 6;
+                register >>= fiveBitMask;
+                registers[2] = "f" + register;
+                register |= encoding;
+                register >>= (6 + 5 + 5 + 5);
+                register &= fiveBitMask;
+                registers[0] = "r" + register;
+                return registers;
+
+            case "dprfpr":
+                register |= encoding;
+                register >>= 5 + 6;
+                register >>= fiveBitMask;
+                registers[2] = "f" + register;
+                register |= encoding;
+                register >>= (6 + 5 + 5 + 5);
+                register &= fiveBitMask;
+                registers[0] = "f" + register;
+                return registers;
+
+            case "gprgprint":
+                register |= encoding;
+                register &= sixBitMask;
+                registers[3] = "" + register;
+                register |= encoding;
+                register >>= 16;
+                register &= fiveBitMask;
+                registers[2] = "r" + register;
+                register |= encoding;
+                register >>= 16 + 5;
+                register &= fiveBitMask;
+                registers[0] = "r" + register;
+                return registers;
+
+            case "gprgpruint":
+                register |= encoding;
+                register &= sixBitMask;
+                registers[3] = "" + register;
+                register |= encoding;
+                register >>= 16;
+                register &= fiveBitMask;
+                registers[2] = "r" + register;
+                register |= encoding;
+                register >>= 16 + 5;
+                register &= fiveBitMask;
+                registers[1] = "r" + register;
+                return registers;
+
+            case "gprgprgpr":
+                register |= encoding;
+                register >>= (5 + 6);
+                register &= fiveBitMask;
+                registers[2] = "r" + register;
+                register |= encoding;
+                register >>= (5 + 5 + 6);
+                register &= fiveBitMask;
+                registers[1] = "r" + register;
+                register |= encoding;
+                register >>= (5 + 5 + 5 + 6);
+                register &= fiveBitMask;
+                registers[0] = "r" + register;
+                return registers;
+
+            case "dprdprdpr":
+                register |= encoding;
+                register >>= (5 + 6);
+                register &= fiveBitMask;
+                registers[2] = "f" + register;
+                register |= encoding;
+                register >>= (5 + 5 + 6);
+                register &= fiveBitMask;
+                registers[1] = "f" + register;
+                register |= encoding;
+                register >>= (5 + 5 + 5 + 6);
+                register &= fiveBitMask;
+                registers[0] = "f" + register;
+                return registers;
+
+            case "fprfprfpr":
+                register |= encoding;
+                register >>= (5 + 6);
+                register &= fiveBitMask;
+                registers[2] = "f" + register;
+                register |= encoding;
+                register >>= (5 + 5 + 6);
+                register &= fiveBitMask;
+                registers[1] = "f" + register;
+                register |= encoding;
+                register >>= (5 + 5 + 5 + 6);
+                register &= fiveBitMask;
+                registers[0] = "f" + register;
+                return registers;
+
+            case "gproff":
+                register |= encoding;
+                register &= sixteenBitMask;
+                registers[3] = "" + register;
+                register |= encoding;
+                register >>= (16 + 5);
+                register &= fiveBitMask;
+                registers[2] = "r" + register;
+                register |= encoding;
+                register |= fiveBitMask;
+                registers[0] = "r" + register;
+                return registers;
+
+            case "dproff":
+                register |= encoding;
+                register &= sixteenBitMask;
+                registers[3] = "" + register;
+                register |= encoding;
+                register >>= (16 + 5);
+                register &= fiveBitMask;
+                registers[2] = "f" + register;
+                register |= encoding;
+                register |= fiveBitMask;
+                registers[0] = "r" + register;
+                return registers;
+
+            case "fproff":
+                register |= encoding;
+                register &= sixteenBitMask;
+                registers[3] = "" + register;
+                register |= encoding;
+                register >>= (16 + 5);
+                register &= fiveBitMask;
+                registers[2] = "f" + register;
+                register |= encoding;
+                register |= fiveBitMask;
+                registers[0] = "r" + register;
+                return registers;
+
+            case "offgpr":
+                register |= encoding;
+                register &= sixteenBitMask;
+                registers[3] = "" + register;
+                register |= encoding;
+                register >>= (16 + 5);
+                register &= fiveBitMask;
+                registers[2] = "r" + register;
+                register |= encoding;
+                register |= fiveBitMask;
+                registers[0] = "r" + register;
+                return registers;
+
+            case "offdpr":
+                register |= encoding;
+                register &= sixteenBitMask;
+                registers[3] = "" + register;
+                register |= encoding;
+                register >>= (16 + 5);
+                register &= fiveBitMask;
+                registers[2] = "f" + register;
+                register |= encoding;
+                register |= fiveBitMask;
+                registers[0] = "r" + register;
+                return registers;
+
+            case "offfpr":
+                register |= encoding;
+                register &= sixteenBitMask;
+                registers[3] = "" + register;
+                register |= encoding;
+                register >>= (16 + 5);
+                register &= fiveBitMask;
+                registers[2] = "f" + register;
+                register |= encoding;
+                register |= fiveBitMask;
+                registers[0] = "r" + register;
+                return registers;
+        }
+        return registers;
+    }
+
+    public String getInstructionRegisterDesign(String operation){
+        return instructionRegisterMap.get(operation);
     }
 
     static int extractSixBitOpcode(int[] encoding){

@@ -7,7 +7,7 @@ public class TomasuloCommonDataBus {
     String nameOfWritingReservationStation;
     static TomasuloCommonDataBus cdbInstance = null;
 
-    public TomasuloCommonDataBus getInstance(){
+    static TomasuloCommonDataBus getInstance(){
         if (cdbInstance == null)
             cdbInstance = new TomasuloCommonDataBus();
         return cdbInstance;

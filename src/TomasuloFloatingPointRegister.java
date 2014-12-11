@@ -1,5 +1,9 @@
 /**
  * Created by rt on 11/30/14.
  */
-public class TomasuloFloatingPointRegister {
+public class TomasuloFloatingPointRegister extends TomasuloRegister{
+
+    public TomasuloFloatingPointRegister(String name) {
+        super(name);
+    }
 }

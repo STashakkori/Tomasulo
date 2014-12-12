@@ -34,34 +34,23 @@ public class TomasuloCentralProcessingUnit {
     public void run(){
         int[] fetched;
         int word;
-        //cpu.instructionBuilder.makeInstruction();
 
         while(!halt || !functionalUnitsCompleted()){
             System.out.println("Clock cycle: " + clock.cycle);
-            System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-            cdb = writeResult(fuManager);
-            //execute(fuManager);
+            System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            //cdb = writeResult(fuManager);
+            execute(rsManager,fuManager);
             if(!halt && !branch){
                 word = memory.fetchWord(pc.address);
                 instruction = decodeInstruction(word,decoder,instructionBuilder);
                 stall = issue(instruction,rsManager,fuManager,regManager);
-                for(TomasuloRegister reg : regManager.registers){
-                    System.out.println("Qi: " + reg.Qi);
-                }
-                for(TomasuloReservationStation rs : rsManager.reservationStations){
-                    System.out.println("Qj: " + rs.Qj);
-                    System.out.println("Qk: " + rs.Qk);
-                    System.out.println("Vj: " + rs.Vj);
-                    System.out.println("Vk: " + rs.Vk);
-                }
-                System.out.println("====================");
+                printDumps(memory,rsManager,fuManager,regManager);
                 if(!halt && !stall) pc.increment();
                 clock.increment();
                 updateReservationStations(cdb);
                 clearReservationStations();
                 if(testcounter== 5) break;
                 testcounter++;
-                //printDumps(memory,rsManager,fuManager,regManager);
             }
         }
     }
@@ -91,6 +80,7 @@ public class TomasuloCentralProcessingUnit {
         instruction.setFirstSourceRegister(operands[0]);
         instruction.setSecondSourceRegister(operands[1]);
         instruction.setDestinationRegister(operands[2]);
+        instruction.instructionType = operationType;
         if(!operands[3].equals("none")) instruction.setImmediateValue(Integer.parseInt(operands[3]));
         else instruction.setImmediateValue(0);
         return instruction;
@@ -138,7 +128,7 @@ public class TomasuloCentralProcessingUnit {
     }
 
     static void execute(TomasuloReservationStationManager rsManager, TomasuloFunctionalUnitManager fuManager){
-        rsManager.execute(fuManager);
+        fuManager.execute(rsManager);
     }
 
     static TomasuloCommonDataBus writeResult(TomasuloFunctionalUnitManager fuManager){
@@ -156,20 +146,20 @@ public class TomasuloCentralProcessingUnit {
         if(instruction.getOpcodeName().equals("trap") && instruction.getImmediateValue() == 0){
             return true;
         }
-        if(!rsManager.hasAvailableRStation()) return true;
         switch(instruction.getClass().getName()) {
             case "TomasuloFloatingPointInstruction":
-                return rsManager.issue("fp",instruction,fuManager,rfManager);
+                if(!rsManager.hasAvailableRStation("float")) return true;
             case "TomasuloIntegerInstruction":
-                return rsManager.issue("int",instruction,fuManager,rfManager);
+                if(!rsManager.hasAvailableRStation("int")) return true;
             case "TomasuloMemoryInstruction":
-                return rsManager.issue("mem",instruction,fuManager,rfManager);
+                if(!rsManager.hasAvailableRStation("mem")) return true;
             case "TomasuloBranchInstruction":
-                return rsManager.issue("branch",instruction,fuManager,rfManager);
+                if(!rsManager.hasAvailableRStation("branch")) return true;
             case "TomasuloTrapInstruction":
-                return rsManager.issue("trap",instruction,fuManager,rfManager);
+                if(!rsManager.hasAvailableRStation("trap")) return true;
+
         }
-        return false;
+        return rsManager.issue(instruction,fuManager,rfManager);
     }
 
     static void updateReservationStations(TomasuloCommonDataBus cdb){
@@ -186,5 +176,6 @@ public class TomasuloCentralProcessingUnit {
         rsManager.printStationContents();
         fuManager.printFunctionalUnitContents();
         regManager.printRegisterContents();
+        System.out.println("\n==========================================================================================");
     }
 }

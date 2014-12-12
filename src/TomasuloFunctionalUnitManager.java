@@ -94,4 +94,40 @@ public class TomasuloFunctionalUnitManager {
         }
         return null;
     }
+
+    public void execute(TomasuloReservationStationManager rsManager){
+        TomasuloFunctionalUnit functionalUnit = null;
+        for(TomasuloReservationStation rs : rsManager.reservationStations){
+            if(rs.isReadyForExecution()){
+                //System.out.println(rs.name + " STATIONNNN READYYYYYYYYYY");
+                rs.isExecuting = true;
+                functionalUnit = this.nextAvailableFunctionalUnit(rs.type);
+                if(functionalUnit == null) continue;
+                rs.cycleCounter = functionalUnit.executionCycleCount;
+                functionalUnit.isFunctionalUnitBusy = true;
+                functionalUnit.referenceToReservationStation = rs.name;
+                rs.cycleCounter--;
+            }
+            else if(rs.isExecuting && rs.cycleCounter > 0){
+                rs.cycleCounter--;
+            }
+            else if(rs.isExecuting && rs.cycleCounter == 0){
+                int result = 0;
+                for(TomasuloFunctionalUnit fUnit : functionalUnits){
+                    if(fUnit.referenceToReservationStation.equals(rs.name)){
+                        result = this.computeResult(fUnit,rs.currentInstruction);
+                        rs.result = result;
+                        rs.resultReady = true;
+                        fUnit.isFunctionalUnitBusy = false;
+                        fUnit.referenceToReservationStation = null;
+                    }
+                }
+            }
+        }
+    }
+
+    public int computeResult(TomasuloFunctionalUnit fUnit, TomasuloInstruction instruction){
+        return fUnit.computeResult(instruction);
+    }
+
 }

@@ -14,8 +14,8 @@ public class TomasuloDecoder {
     */
     public TomasuloDecoder(){
 
-        instructionOpcodeMap= new HashMap(); // opcodenumber -> instruction operation
-        instructionFunctionCodeMap = new HashMap(); // functioncode -> instruction operation
+        instructionOpcodeMap= new HashMap<Integer,String>(); // opcodenumber -> instruction operation
+        instructionFunctionCodeMap = new HashMap<Integer,String>(); // functioncode -> instruction operation
 
         // Integer Unit Instructions
         instructionOpcodeMap.put(8,"addi");
@@ -59,7 +59,7 @@ public class TomasuloDecoder {
         instructionFunctionCodeMap.put(53,"movi2fp");
 
         // Map that stores the register structure of each instruction operation
-        instructionRegisterMap = new HashMap();
+        instructionRegisterMap = new HashMap<String,String>();
         instructionRegisterMap.put("nop","none");
         instructionRegisterMap.put("trap","number");
         instructionRegisterMap.put("j","name");
@@ -143,15 +143,15 @@ public class TomasuloDecoder {
      */
     public String getInstructionOpcodeOperation(int[] encoding){
         int opcodeNumber = extractSixBitOpcode(encoding);
-        System.out.println("decoder test: " + opcodeNumber);
+        //System.out.println("decoder test: " + opcodeNumber);
         if (instructionOpcodeMap.get(opcodeNumber) == "rtypei"){
             int functionCode = extractSixBitFunctionCode(encoding);
-            System.out.println("functionCode:  " + functionCode);
+            //System.out.println("functionCode:  " + functionCode);
             return instructionFunctionCodeMap.get(functionCode);
         }
         if (instructionOpcodeMap.get(opcodeNumber) == "rtypef"){
             int functionCode = extractFiveBitFunctionCode(encoding);
-            System.out.println("functionCode:  " + functionCode);
+            //System.out.println("functionCode:  " + functionCode);
             return instructionFunctionCodeMap.get(functionCode);
         }
         return instructionOpcodeMap.get(opcodeNumber);
@@ -159,15 +159,15 @@ public class TomasuloDecoder {
 
     public String getInstructionOpcodeOperationFromWord(int encoding){
         int opcodeNumber = extractSixBitOpcodeFromWord(encoding);
-        System.out.println("decoder test: " + opcodeNumber);
+        //System.out.println("decoder test: " + opcodeNumber);
         if (instructionOpcodeMap.get(opcodeNumber) == "rtypei"){
             int functionCode = extractSixBitFunctionCodeFromWord(encoding);
-            System.out.println("functionCode:  " + functionCode);
+            //System.out.println("functionCode:  " + functionCode);
             return instructionFunctionCodeMap.get(functionCode);
         }
         if (instructionOpcodeMap.get(opcodeNumber) == "rtypef"){
             int functionCode = extractFiveBitFunctionCodeFromWord(encoding);
-            System.out.println("functionCode:  " + functionCode);
+            //System.out.println("functionCode:  " + functionCode);
             return instructionFunctionCodeMap.get(functionCode);
         }
         return instructionOpcodeMap.get(opcodeNumber);
@@ -300,7 +300,7 @@ public class TomasuloDecoder {
 
             case "gprgprint":
                 register |= encoding;
-                register &= sixBitMask;
+                register &= sixteenBitMask;
                 registers[3] = "" + register;
                 register |= encoding;
                 register >>= 16;
@@ -504,7 +504,7 @@ public class TomasuloDecoder {
             case "sub":
             case "and":
             case "or":
-            case "zor":
+            case "xor":
             case "movf":
             case "movfp2i":
             case "movi2fp":
@@ -538,7 +538,7 @@ public class TomasuloDecoder {
             case "div":
             case "ctf2i":
             case "cvti2f":
-                return "fp";
+                return "float";
         }
         return "error";
     }

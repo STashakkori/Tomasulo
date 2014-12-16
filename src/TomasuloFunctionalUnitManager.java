@@ -1,10 +1,14 @@
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
 /**
- * Created by rt on 11/30/14.
+ * TomasuloFunctionalUnitManager :: Class that holds all 8 functional units and assignes them to reservation stations
+ * during the execute stage.
+ *
+ * Created by sina on 11/30/14.
  */
 public class TomasuloFunctionalUnitManager {
 
@@ -20,40 +24,35 @@ public class TomasuloFunctionalUnitManager {
         // Initialize functional units :: integer units
         for(int i = 0; i < 3; i++){
             functionalUnits[i] = new TomasuloIntegerFunctionalUnit();
-            functionalUnits[i].name = "Int" + i;
+            functionalUnits[i].name = "int" + i;
         }
 
         // Initialize functional units :: trap units
             functionalUnits[3] = new TomasuloTrapFunctionalUnit();
-            functionalUnits[3].name = "Trap0";
+            functionalUnits[3].name = "trap0";
 
         // Initialize functional units :: memory units
             functionalUnits[4] = new TomasuloMemoryFunctionalUnit();
-            functionalUnits[4].name = "Mem0";
+            functionalUnits[4].name = "mem0";
 
         // Initialize functional units :: floating point units
         for(int i = 5; i < 7; i++){
             functionalUnits[i] = new TomasuloFloatingPointFunctionalUnit();
-            functionalUnits[i].name = "Float" + i % 5;
+            functionalUnits[i].name = "float" + i % 5;
         }
 
         // Initialize functional units :: branch units
             functionalUnits[7] = new TomasuloBranchFunctionalUnit();
-            functionalUnits[7].name = "Branch0";
+            functionalUnits[7].name = "branch0";
     }
 
-    public void printFunctionalUnitContents(){
-
-    }
-
-    public void takeInstruction(TomasuloInstruction instruction){
-
-    }
-
-    public boolean allUnitsCompleted(){
-        return false;
-    }
-
+    /**
+     * nextAvailableFunctionalUnit :: Method that returns a functional unit of a certain
+     * type that has its busy bit set to false meaning that it is not in use.
+     *
+     * @param instructionType
+     * @return
+     */
     public TomasuloFunctionalUnit nextAvailableFunctionalUnit(String instructionType) {
         switch(instructionType){
             case "int":
@@ -63,6 +62,8 @@ public class TomasuloFunctionalUnitManager {
                         return fu;
                     }
                 }
+                return null;
+
             case "trap":
                 for (TomasuloFunctionalUnit fu : functionalUnits) {
                     if (fu.getClass().getName().equals("TomasuloTrapFunctionalUnit")
@@ -70,6 +71,8 @@ public class TomasuloFunctionalUnitManager {
                         return fu;
                     }
                 }
+                return null;
+
             case "mem":
                 for (TomasuloFunctionalUnit fu : functionalUnits) {
                     if (fu.getClass().getName().equals("TomasuloMemoryFunctionalUnit")
@@ -77,6 +80,8 @@ public class TomasuloFunctionalUnitManager {
                         return fu;
                     }
                 }
+                return null;
+
             case "float":
                 for (TomasuloFunctionalUnit fu : functionalUnits) {
                     if (fu.getClass().getName().equals("TomasuloFloatingPointFunctionalUnit")
@@ -84,6 +89,8 @@ public class TomasuloFunctionalUnitManager {
                         return fu;
                     }
                 }
+                return null;
+
             case "branch":
                 for (TomasuloFunctionalUnit fu : functionalUnits) {
                     if (fu.getClass().getName().equals("TomasuloBranchFunctionalUnit")
@@ -91,43 +98,89 @@ public class TomasuloFunctionalUnitManager {
                         return fu;
                     }
                 }
+                return null;
         }
         return null;
     }
 
-    public void execute(TomasuloReservationStationManager rsManager){
+    /**
+     * execute :: method that assigns functional units to reervation stations and then calls computeResult.
+     *
+     * @param rsManager
+     * @param rfManager
+     * @param writer
+     * @param memory
+     */
+    public void execute(TomasuloReservationStationManager rsManager,TomasuloRegisterFileManager rfManager, PrintWriter writer,TomasuloMemory memory){
         TomasuloFunctionalUnit functionalUnit = null;
         for(TomasuloReservationStation rs : rsManager.reservationStations){
-            if(rs.isReadyForExecution()){
-                //System.out.println(rs.name + " STATIONNNN READYYYYYYYYYY");
+            if(rs.busy == false) continue;
+            functionalUnit = this.nextAvailableFunctionalUnit(rs.type);
+            if(rs.isReadyForExecution() && functionalUnit != null){
+                if(rs.type.equals("trap") && trapBuffer.peek() != rs){
+                    if(trapBuffer.peek()!=null)
+                    continue;
+                }
+                if(!trapBuffer.isEmpty() && rs.type.equals("trap"))  {
+                    trapBuffer.remove();
+                }
+                if(rs.type.equals("mem") && loadstoreBuffer.peek() != rs){
+                    if(loadstoreBuffer.peek()!=null)
+                        continue;
+                }
+                if(!loadstoreBuffer.isEmpty() && rs.type.equals("mem"))  {
+                    loadstoreBuffer.remove();
+                }
                 rs.isExecuting = true;
-                functionalUnit = this.nextAvailableFunctionalUnit(rs.type);
-                if(functionalUnit == null) continue;
-                rs.cycleCounter = functionalUnit.executionCycleCount;
-                functionalUnit.isFunctionalUnitBusy = true;
-                functionalUnit.referenceToReservationStation = rs.name;
+                rs.resultWritten = false;
+                rs.resultReady = false;
+                rs.setExecutingUnit(functionalUnit);
                 rs.cycleCounter--;
+                rs.executingUnit.isFunctionalUnitBusy = true;
+                rs.executingUnit.referenceToReservationStation = rs.name;
             }
             else if(rs.isExecuting && rs.cycleCounter > 0){
                 rs.cycleCounter--;
             }
-            else if(rs.isExecuting && rs.cycleCounter == 0){
+            else if(rs.isExecuting && !rs.resultReady && rs.cycleCounter == 0){
                 int result = 0;
-                for(TomasuloFunctionalUnit fUnit : functionalUnits){
-                    if(fUnit.referenceToReservationStation.equals(rs.name)){
-                        result = this.computeResult(fUnit,rs.currentInstruction);
-                        rs.result = result;
-                        rs.resultReady = true;
-                        fUnit.isFunctionalUnitBusy = false;
-                        fUnit.referenceToReservationStation = null;
-                    }
-                }
+                result = this.computeResult(rs,rfManager,writer,memory,trapBuffer,loadstoreBuffer);
+                rs.result = result;
+                rs.resultReady = true;
+                rs.executingUnit.isFunctionalUnitBusy = false;
+                rs.executingUnit.referenceToReservationStation = null;
+                rs.isExecuting = false;
             }
         }
     }
 
-    public int computeResult(TomasuloFunctionalUnit fUnit, TomasuloInstruction instruction){
-        return fUnit.computeResult(instruction);
+    /**
+     *
+     * @param reservationStation
+     * @param registerFileManager
+     * @param writer
+     * @param memory
+     * @param trapBuffer
+     * @param loadBuffer
+     * @return
+     */
+    public int computeResult(TomasuloReservationStation reservationStation, TomasuloRegisterFileManager registerFileManager, PrintWriter writer, TomasuloMemory memory,
+                             Queue<TomasuloReservationStation> trapBuffer,Queue<TomasuloReservationStation> loadBuffer){
+        return reservationStation.executingUnit.computeResult(reservationStation,registerFileManager,writer,memory,trapBuffer,loadBuffer);
+    }
+
+    /**
+     *
+     */
+    public void printFunctionalUnitContents(){
+        int count = 1;
+        for(TomasuloFunctionalUnit fu : this.functionalUnits){
+            System.out.print("FUname:" + fu.name + " ");
+            System.out.print("station:" + fu.referenceToReservationStation + "   ");
+            if(count%4==0) System.out.println();
+            count++;
+        }
+        System.out.println("..................................................................................");
     }
 
 }

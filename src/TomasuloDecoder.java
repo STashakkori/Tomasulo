@@ -1,7 +1,7 @@
 import java.util.HashMap;
 
 /**
- * Created by rt on 12/2/14.
+ * Created by sina on 12/2/14.
  */
 public class TomasuloDecoder {
 
@@ -43,7 +43,7 @@ public class TomasuloDecoder {
         instructionFunctionCodeMap.put(1,"subf");
         instructionFunctionCodeMap.put(2,"multf");
         instructionFunctionCodeMap.put(3,"divf");
-        instructionFunctionCodeMap.put(9,"ctf2i");
+        instructionFunctionCodeMap.put(9,"cvtf2i");
         instructionFunctionCodeMap.put(12,"cvti2f");
         instructionFunctionCodeMap.put(14,"mult");
         instructionFunctionCodeMap.put(15,"div");
@@ -75,10 +75,6 @@ public class TomasuloDecoder {
         instructionRegisterMap.put("movf","fprfpr");
         instructionRegisterMap.put("lhi","gprnum");
         instructionRegisterMap.put("movi2fp","fprgpr");
-        instructionRegisterMap.put("cvtd2f","fprdpr");
-        instructionRegisterMap.put("cvtd2i","fprdpr");
-        instructionRegisterMap.put("cvtf2d","dprfpr");
-        instructionRegisterMap.put("cvti2d","dprfpr");
         instructionRegisterMap.put("addi","gprgprint");
         instructionRegisterMap.put("seqi","gprgprint");
         instructionRegisterMap.put("sgei","gprgprint");
@@ -190,19 +186,33 @@ public class TomasuloDecoder {
                 return registers;
 
             case "number":
-                register |= encoding;
-                register &= fiveBitMask;
-                registers[3] = "" + register;
-                register |= encoding;
-                register >>= (32 - (6 + 5));
-                register &= fiveBitMask;
-                registers[0] = "r" + register;
+                int functionCode = 0;
+                functionCode|= encoding;
+                functionCode &= fiveBitMask;
+                if(functionCode == 2) {
+                    register |= encoding;
+                    register &= fiveBitMask;
+                    registers[3] = "" + register;
+                    register |= encoding;
+                    register >>= (32 - (6 + 5));
+                    register &= fiveBitMask;
+                    registers[0] = "f" + register;
+                }
+                else{
+                    register |= encoding;
+                    register &= fiveBitMask;
+                    registers[3] = "" + register;
+                    register |= encoding;
+                    register >>= (32 - (6 + 5));
+                    register &= fiveBitMask;
+                    registers[0] = "r" + register;
+                }
                 return registers;
 
             case "name":
                 register |= encoding;
                 register &= twentySixBitMask;
-                registers[2] = "" + register;
+                registers[3] = "" + (short)register;
                 return registers;
 
             case "gpr":
@@ -213,13 +223,13 @@ public class TomasuloDecoder {
                 return registers;
 
             case "gprname":
-                register |= encoding;
+                register = encoding;
                 register >>= (5 + 16);
                 register &= fiveBitMask;
                 registers[0] = "r" + register;
-                register |= encoding;
+                register = encoding;
                 register &= sixteenBitMask;
-                registers[3] = "" + register;
+                registers[3] = "" + (short)register;
                 return registers;
 
             case "gprfpr":
@@ -268,7 +278,7 @@ public class TomasuloDecoder {
             case "fprgpr":
                 register |= encoding;
                 register >>= 5 + 6;
-                register >>= fiveBitMask;
+                register &= fiveBitMask;
                 registers[2] = "f" + register;
                 register |= encoding;
                 register >>= (6 + 5 + 5 + 5);
@@ -279,7 +289,7 @@ public class TomasuloDecoder {
             case "fprdpr":
                 register |= encoding;
                 register >>= 5 + 6;
-                register >>= fiveBitMask;
+                register &= fiveBitMask;
                 registers[2] = "f" + register;
                 register |= encoding;
                 register >>= (6 + 5 + 5 + 5);
@@ -290,7 +300,7 @@ public class TomasuloDecoder {
             case "dprfpr":
                 register |= encoding;
                 register >>= 5 + 6;
-                register >>= fiveBitMask;
+                register &= fiveBitMask;
                 registers[2] = "f" + register;
                 register |= encoding;
                 register >>= (6 + 5 + 5 + 5);
@@ -301,7 +311,7 @@ public class TomasuloDecoder {
             case "gprgprint":
                 register |= encoding;
                 register &= sixteenBitMask;
-                registers[3] = "" + register;
+                registers[3] = "" + (short)register;
                 register |= encoding;
                 register >>= 16;
                 register &= fiveBitMask;
@@ -378,10 +388,11 @@ public class TomasuloDecoder {
                 register |= encoding;
                 register >>= (16 + 5);
                 register &= fiveBitMask;
-                registers[2] = "r" + register;
-                register |= encoding;
-                register |= fiveBitMask;
                 registers[0] = "r" + register;
+                register |= encoding;
+                register >>= (16);
+                register &= fiveBitMask;
+                registers[2] = "r" + register;
                 return registers;
 
             case "dproff":
@@ -391,10 +402,10 @@ public class TomasuloDecoder {
                 register |= encoding;
                 register >>= (16 + 5);
                 register &= fiveBitMask;
-                registers[2] = "f" + register;
+                registers[2] = "r" + register;
                 register |= encoding;
-                register |= fiveBitMask;
-                registers[0] = "r" + register;
+                register &= fiveBitMask;
+                registers[0] = "f" + register;
                 return registers;
 
             case "fproff":
@@ -402,51 +413,55 @@ public class TomasuloDecoder {
                 register &= sixteenBitMask;
                 registers[3] = "" + register;
                 register |= encoding;
-                register >>= (16 + 5);
+                register >>= (16);
                 register &= fiveBitMask;
                 registers[2] = "f" + register;
                 register |= encoding;
-                register |= fiveBitMask;
+                register >>= (16 +5);
+                register &= fiveBitMask;
                 registers[0] = "r" + register;
                 return registers;
 
             case "offgpr":
                 register |= encoding;
                 register &= sixteenBitMask;
-                registers[3] = "" + register;
+                registers[3] = "" + (short)register;
                 register |= encoding;
                 register >>= (16 + 5);
                 register &= fiveBitMask;
-                registers[2] = "r" + register;
-                register |= encoding;
-                register |= fiveBitMask;
                 registers[0] = "r" + register;
+                register |= encoding;
+                register >>= (16);
+                register &= fiveBitMask;
+                registers[1] = "r" + register;
                 return registers;
 
             case "offdpr":
                 register |= encoding;
                 register &= sixteenBitMask;
-                registers[3] = "" + register;
+                registers[3] = "" + (short)register;
                 register |= encoding;
                 register >>= (16 + 5);
                 register &= fiveBitMask;
-                registers[2] = "f" + register;
-                register |= encoding;
-                register |= fiveBitMask;
                 registers[0] = "r" + register;
+                register |= encoding;
+                register >>= (16);
+                register &= fiveBitMask;
+                registers[1] = "f" + register;
                 return registers;
 
             case "offfpr":
                 register |= encoding;
                 register &= sixteenBitMask;
-                registers[3] = "" + register;
+                registers[3] = "" + (short)register;
                 register |= encoding;
                 register >>= (16 + 5);
                 register &= fiveBitMask;
-                registers[2] = "f" + register;
-                register |= encoding;
-                register |= fiveBitMask;
                 registers[0] = "r" + register;
+                register |= encoding;
+                register >>= (16);
+                register &= fiveBitMask;
+                registers[1] = "f" + register;
                 return registers;
         }
         return registers;
@@ -536,7 +551,7 @@ public class TomasuloDecoder {
             case "divf":
             case "mult":
             case "div":
-            case "ctf2i":
+            case "cvtf2i":
             case "cvti2f":
                 return "float";
         }
@@ -567,7 +582,7 @@ public class TomasuloDecoder {
             case "divf":
             case "mult":
             case "div":
-            case "ctf2i":
+            case "cvtf2i":
             case "cvti2f":
                 return "Rtype";
 
@@ -614,7 +629,7 @@ public class TomasuloDecoder {
             case "divf":
             case "mult":
             case "div":
-            case "ctf2i":
+            case "cvtf2i":
             case "cvti2f":
                 return 1;
         }

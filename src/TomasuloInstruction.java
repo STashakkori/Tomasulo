@@ -1,5 +1,5 @@
 /**
- * Created by rt on 12/1/14.
+ * Created by sina on 12/1/14.
  */
 public class TomasuloInstruction {
 
@@ -16,8 +16,10 @@ public class TomasuloInstruction {
     boolean immediateFieldStartingBit;
     boolean immediateFieldEndingBit;
     String registerDesign;
+    String instructionType;
 
     public TomasuloInstruction(){
+        instructionType = null;
     }
 
     public void setOpcodeName(String opcodeName) {

@@ -1,5 +1,5 @@
 /**
- * Created by rt on 11/30/14.
+ * Created by sina on 11/30/14.
  */
 public class TomasuloReservationStation {
 
@@ -15,10 +15,14 @@ public class TomasuloReservationStation {
     public boolean resultReady; // result ready for writing yet?
     public boolean resultWritten; // result written yet?
     public String type;
+    public int cycleCounter;
+    public boolean isExecuting;
+    public TomasuloInstruction currentInstruction;
+    public TomasuloFunctionalUnit executingUnit;
+    public int branchValue;
 
     public TomasuloReservationStation(String nameOfStation, String type){
         this.name = nameOfStation;
-        busy = false;
         opcode = null;
         Vj = 0;
         Vk = 0;
@@ -29,16 +33,15 @@ public class TomasuloReservationStation {
         resultReady = false;
         resultWritten = false;
         this.type = type;
+        cycleCounter = 0;
+        isExecuting = false;
+        currentInstruction = null;
+        executingUnit = null;
+        branchValue = 0;
     }
 
-    /*
-    public void setForExecution(){
-        this.busy =
-     }
-    */
-
     public void resetContents(){
-        busy = false;
+        this.setBusy(false);
         opcode = null;
         Vj = 0;
         Vk = 0;
@@ -48,14 +51,47 @@ public class TomasuloReservationStation {
         result = 0;
         resultReady = false;
         resultWritten = false;
+        currentInstruction = null;
+        executingUnit = null;
+        branchValue = 0;
+
+        switch(type){
+            case "int":
+                cycleCounter = 1;
+                break;
+            case "float":
+                cycleCounter = 4;
+                break;
+            case "trap":
+                cycleCounter = 1;
+                break;
+            case "branch":
+                cycleCounter = 1;
+                break;
+            case "mem":
+                cycleCounter = 2;
+                break;
+        }
+    }
+
+    public void setExecutingUnit(TomasuloFunctionalUnit executingUnit) {
+        this.executingUnit = executingUnit;
     }
 
     public void printContents(){
 
     }
 
+    public void setCurrentInstruction(TomasuloInstruction currentInstruction) {
+        this.currentInstruction = currentInstruction;
+    }
+
+    public void setBusy(boolean busy) {
+        this.busy = busy;
+    }
+
     public boolean isReadyForExecution(){
-        return (busy == true && Qj == null && Qk == null && resultReady == false);
+        return (busy == true && Qj == null && Qk == null && resultReady == false && isExecuting == false);
     }
 
     public void execute(TomasuloFunctionalUnitManager fuManager){

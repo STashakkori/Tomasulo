@@ -1,8 +1,13 @@
 /**
- * Created by rt on 12/2/14.
+ * Created by sina on 12/2/14.
  */
 public class TomasuloInstructionFactory {
 
+    /**
+     * 
+     * @param newInstructionType
+     * @return
+     */
     public TomasuloInstruction makeInstruction(String newInstructionType) {
 
         TomasuloInstruction newInstruction = null;
@@ -12,7 +17,7 @@ public class TomasuloInstructionFactory {
                 return new TomasuloIntegerInstruction();
             case "mem":
                 return new TomasuloMemoryInstruction();
-            case "fp":
+            case "float":
                 return new TomasuloFloatingPointInstruction();
             case "branch":
                 return new TomasuloBranchInstruction();

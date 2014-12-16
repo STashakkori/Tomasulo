@@ -9,21 +9,21 @@ import java.util.Scanner;
 public class TomasuloReader {
 
     ArrayList<String[]> linesoup;
+    String inputFileName;
 
     public TomasuloReader(String inputFileName){
         linesoup = new  ArrayList<String[]>();
+        this.inputFileName = inputFileName;
     }
 
     public void readFile() {
-        File file = new File("intUnit1.hex");
+        File file = new File(inputFileName);
         try {
             Scanner sc = new Scanner(file);
-            System.out.println("================= Processed Raw Input ==================");
             while (sc.hasNextLine()) {
                 String linestring = sc.nextLine();
                 String[] splitline = linestring.split(": ");
                 splitline[1] = splitline[1].substring(0,splitline[1].indexOf("#")).replace(" ","");
-                System.out.println(splitline[0] + " " + splitline[1]);
                 linesoup.add(splitline);
             }
             sc.close();

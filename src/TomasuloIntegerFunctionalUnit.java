@@ -1,40 +1,39 @@
 import java.io.PrintWriter;
+import java.util.Queue;
 
 /**
- * Created by rt on 12/3/14.
+ * Created by sina on 12/3/14.
  */
 public class TomasuloIntegerFunctionalUnit extends TomasuloFunctionalUnit {
 
-    public int computeResult(TomasuloReservationStation rs,PrintWriter writer){
+    TomasuloTools tools = new TomasuloTools();
+
+    public int computeResult(TomasuloReservationStation rs, TomasuloRegisterFileManager rf, PrintWriter writer, TomasuloMemory memory,
+                             Queue<TomasuloReservationStation> trapBuffer,Queue<TomasuloReservationStation> loadBuffer){
         if(rs.currentInstruction == null) return 0;
         switch(rs.currentInstruction.opcodeName){
             case "addi":
-                writer.println("The sum of " + rs.Vj + " and " + rs.currentInstruction.immediateValue + " is " + (rs.Vj + rs.currentInstruction.immediateValue + "."));
-                writer.close();
-                return (rs.Vj + rs.currentInstruction.immediateValue);
+                int source= 0;
+                if (rs.Vj >> 31 == 1){
+                    System.out.println("two comp test");
+                    source = tools.takeTwosCompliment(rs.Vj,32);
+                    source += rs.currentInstruction.immediateValue;
+                }
+                else{
+                    source = rs.Vj + rs.currentInstruction.immediateValue;
+                }
+                return source;
             case "nop":
-                writer.println("nothing done");
-                writer.close();
                 return 0;
             case "add":
-                writer.println(rs.Vj + " add " + rs.Vk + " is " + (rs.Vj + rs.Vk) + ".");
-                writer.close();
                 return (rs.Vj + rs.Vk);
             case "sub":
-                writer.println(rs.Vj + " minus " + rs.Vk + " is " + (rs.Vj - rs.Vk));
-                writer.close();
                 return (rs.Vj - rs.Vk);
             case "and":
-                writer.println(rs.Vj + " and " + rs.Vk + " is " + (rs.Vj & rs.Vk));
-                writer.close();
                 return (rs.Vj & rs.Vk);
             case "or":
-                writer.println(rs.Vj + " or " + rs.Vk + " is " + (rs.Vj | rs.Vk));
-                writer.close();
                 return (rs.Vj | rs.Vk);
             case "xor":
-                writer.println(rs.Vj + " xor " + rs.Vk + " is " + (rs.Vj ^ rs.Vk));
-                writer.close();
                 return (rs.Vj ^ rs.Vk);
             case "movf":
                 return rs.Vj;

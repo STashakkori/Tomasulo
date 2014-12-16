@@ -1,10 +1,21 @@
 /**
- * Created by rt on 11/29/14.
+ * Created by sina on 11/29/14.
  */
 public class TomasuloCommonDataBus {
 
-    long result;
+    int result;
     String nameOfWritingReservationStation;
+
+    public String getNameOfSourceFunctionalUnit() {
+        return nameOfSourceFunctionalUnit;
+    }
+
+    String nameOfSourceFunctionalUnit;
+
+    public void setNameOfSourceFunctionalUnit(String nameOfSourceFunctionalUnit) {
+        this.nameOfSourceFunctionalUnit = nameOfSourceFunctionalUnit;
+    }
+
     static TomasuloCommonDataBus cdbInstance = null;
 
     static TomasuloCommonDataBus getInstance(){
@@ -20,7 +31,12 @@ public class TomasuloCommonDataBus {
     public String getRSName() {
         return nameOfWritingReservationStation;
     }
-    public long getResult(){
+
+    public void setResult(int result) {
+        this.result = result;
+    }
+
+    public int getResult(){
         return result;
     }
 }

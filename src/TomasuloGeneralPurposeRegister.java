@@ -1,5 +1,5 @@
 /**
- * Created by rt on 11/30/14.
+ * Created by sina on 11/30/14.
  */
 public class TomasuloGeneralPurposeRegister  extends TomasuloRegister{
 

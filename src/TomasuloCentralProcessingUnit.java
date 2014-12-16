@@ -197,7 +197,6 @@ public class TomasuloCentralProcessingUnit {
         if(cdb.nameOfWritingReservationStation == null) return;
         for(TomasuloRegister rf : rfManager.registers){
             if(rf.Qi != null && rf.Qi.equals(cdb.nameOfWritingReservationStation)){
-                //System.out.println("Test register to be writtenn: " + rf.registerName);
                 rf.setValue(cdb.result);
                 rf.Qi = null;
             }
@@ -216,10 +215,6 @@ public class TomasuloCentralProcessingUnit {
             }
         }
         cdb.nameOfWritingReservationStation = null;
-        /*for(TomasuloReservationStation rs : rsManager.reservationStations){
-            if(rs.name.equals(cdb.nameOfWritingReservationStation))
-                rs.setBusy(false);
-        }*/
     }
 
     /**
@@ -230,6 +225,17 @@ public class TomasuloCentralProcessingUnit {
         for(TomasuloReservationStation rs : rsManager.reservationStations){
             if(rs.resultWritten == true) rs.resetContents();
         }
+    }
+
+    /**
+     *
+     */
+    static void printCDB(){
+        System.out.println("...........................................");
+        TomasuloCommonDataBus cdb = TomasuloCommonDataBus.getInstance();
+        System.out.println("cdb:" + cdb.result);
+        System.out.println("writtenby:" + cdb.nameOfWritingReservationStation);
+        System.out.println("...........................................");
     }
 
     /**
@@ -359,16 +365,5 @@ public class TomasuloCentralProcessingUnit {
             e.printStackTrace();
         }
         return writer;
-    }
-
-    /**
-     *
-     */
-    static void printCDB(){
-        System.out.println("...........................................");
-        TomasuloCommonDataBus cdb = TomasuloCommonDataBus.getInstance();
-        System.out.println("cdb:" + cdb.result);
-        System.out.println("writtenby:" + cdb.nameOfWritingReservationStation);
-        System.out.println("...........................................");
     }
 }
